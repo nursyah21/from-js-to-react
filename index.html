@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+
+      input {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+      }
+
+
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const {useState, useEffect} = React;
+
+      let nextId = 0;
+
+      function createTodo(text, completed = false) {
+        return {
+          id: nextId++,
+          text,
+          completed
+        };
+      }
+
+      const initialTodos = [
+        createTodo('Get apples', true),
+        createTodo('Get oranges', true),
+        createTodo('Get carrots'),
+      ];
+
+      function TodoList() {
+        const [todos, setTodos] = useState(initialTodos);
+        const [showActive, setShowActive] = useState(false);
+        const [activeTodos, setActiveTodos] = useState([]);
+        const [visibleTodos, setVisibleTodos] = useState([]);
+        const [footer, setFooter] = useState(null);
+
+        useEffect(() => {
+          setActiveTodos(todos.filter(todo => !todo.completed));
+        }, [todos]);
+
+        useEffect(() => {
+          setVisibleTodos(showActive ? activeTodos : todos);
+        }, [showActive, todos, activeTodos]);
+
+        useEffect(() => {
+          setFooter(
+            <footer>
+              {activeTodos.length} todos left
+            </footer>
+          );
+        }, [activeTodos]);
+
+        return (
+          <>
+            <label>
+              <input
+                type="checkbox"
+                checked={showActive}
+                onChange={e => setShowActive(e.target.checked)}
+              />
+              Show only active todos
+            </label> <br />
+            <NewTodo onAdd={newTodo => setTodos([...todos, newTodo])} />
+            <ul>
+              {visibleTodos.map(todo => (
+                <li key={todo.id}>
+                  {todo.completed ? <s>{todo.text}</s> : todo.text}
+                </li>
+              ))}
+            </ul>
+            {footer}
+          </>
+        );
+      }
+
+      function NewTodo({ onAdd }) {
+        const [text, setText] = useState('');
+
+        function handleAddClick() {
+          if(text.length === 0)return
+          setText('');
+          onAdd(createTodo(text));
+        }
+
+        return (
+          <>
+            <input value={text} onChange={e => setText(e.target.value)} />
+            <button onClick={handleAddClick}>
+              Add
+            </button>
+          </>
+        );
+      }
+    
+      function MyApp() {
+        return <>
+          <h1>Todo List</h1>
+          <TodoList />
+        </>;
+      }
+
+      const container = document.getElementById('root');
+      const root = ReactDOM.createRoot(container);
+      root.render(<MyApp />);
+
+    </script>
+    <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      Read this page for starting a new React project with JSX:
+      https://react.dev/learn/start-a-new-react-project
+
+      Read this page for adding React with JSX to an existing project:
+      https://react.dev/learn/add-react-to-an-existing-project
+    -->
+  </body>
+</html>
